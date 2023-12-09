@@ -5,15 +5,43 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 )
 
-func main() {
-	fmt.Println("HELLO WORLD")
+type CronJobsList struct {
+	CronJobType string
+	CronJobName string
+}
 
+func main() {
+	fmt.Println("Starting Demand Cron Jobs Server...")
+
+	// handler function #1 - returns the index.html template, with film data
 	h1 := func(w http.ResponseWriter, r *http.Request) {
-		tmpl := template.Must(template.ParseFiles("index.html"))
-		tmpl.Execute(w, nil)
+		tmpl := template.Must(template.ParseFiles("templates/index.html"))
+		cronjobsList := map[string][]CronJobsList{
+			"CronsList": {
+				{CronJobType: "1", CronJobName: "15min CronJob"},
+				{CronJobType: "2", CronJobName: "1h CronJob"},
+				{CronJobType: "3", CronJobName: "4h CronJob"},
+			},
+		}
+		tmpl.Execute(w, cronjobsList)
 	}
+
+	// handler function #2 - returns the template block with the newly added film, as an HTMX response
+	h2 := func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(1 * time.Second)
+		cronjobType := r.PostFormValue("cronjobType")
+		cronjobName := r.PostFormValue("cronjobName")
+		tmpl := template.Must(template.ParseFiles("templates/index.html"))
+		tmpl.ExecuteTemplate(w, "cron-jobs-list", CronJobsList{CronJobType: cronjobType, CronJobName: cronjobName})
+	}
+
+	// define handlers
 	http.HandleFunc("/", h1)
+	http.HandleFunc("/add-cronjob/", h2)
+
 	log.Fatal(http.ListenAndServe(":8000", nil))
+
 }
