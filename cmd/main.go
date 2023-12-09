@@ -16,7 +16,7 @@ type CronJobsList struct {
 func main() {
 	fmt.Println("Starting Demand Cron Jobs Server...")
 
-	// handler function #1 - returns the index.html template, with film data
+	// handler function #1 - returns the index.html template, with cronjob data
 	h1 := func(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.Must(template.ParseFiles("templates/index.html"))
 		cronjobsList := map[string][]CronJobsList{
@@ -29,7 +29,7 @@ func main() {
 		tmpl.Execute(w, cronjobsList)
 	}
 
-	// handler function #2 - returns the template block with the newly added film, as an HTMX response
+	// handler function #2 - returns the template block with the newly added cronjob, as an HTMX response
 	h2 := func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(1 * time.Second)
 		cronjobType := r.PostFormValue("cronjobType")
