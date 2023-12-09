@@ -9,8 +9,9 @@ import (
 )
 
 type CronJobsListDetails struct {
-	CronJobType string
-	CronJobName string
+	ConnectionType string
+	CronJobType    string
+	CronJobName    string
 }
 
 func main() {
@@ -21,9 +22,9 @@ func main() {
 		tmpl := template.Must(template.ParseFiles("templates/index.html"))
 		cronjobsListDetails := map[string][]CronJobsListDetails{
 			"CronsList": {
-				{CronJobType: "1", CronJobName: "15min CronJob"},
-				{CronJobType: "2", CronJobName: "1h CronJob"},
-				{CronJobType: "3", CronJobName: "4h CronJob"},
+				{ConnectionType: "API", CronJobType: "1", CronJobName: "15min CronJob"},
+				{ConnectionType: "SFTP", CronJobType: "2", CronJobName: "1h CronJob"},
+				{ConnectionType: "FTP", CronJobType: "3", CronJobName: "4h CronJob"},
 			},
 		}
 		tmpl.Execute(w, cronjobsListDetails)
@@ -32,10 +33,15 @@ func main() {
 	// handler function #2 - returns the template block with the newly added cronjob, as an HTMX response
 	h2 := func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(1 * time.Second)
+		connectionType := r.PostFormValue("connectionType")
 		cronjobType := r.PostFormValue("cronjobType")
 		cronjobName := r.PostFormValue("cronjobName")
 		tmpl := template.Must(template.ParseFiles("templates/index.html"))
-		tmpl.ExecuteTemplate(w, "cron-jobs-list", CronJobsListDetails{CronJobType: cronjobType, CronJobName: cronjobName})
+		tmpl.ExecuteTemplate(w, "cron-jobs-list", CronJobsListDetails{
+			ConnectionType: connectionType,
+			CronJobType:    cronjobType,
+			CronJobName:    cronjobName,
+		})
 	}
 
 	// define handlers

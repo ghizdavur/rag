@@ -18,7 +18,7 @@
             <ul class="list-group fs-5 me-5" id="cronjobs-list">
                 {{ range .CronsList }}
                 {{ block "cron-jobs-list" .}}
-                    <li class="list-group-item bg-primary text-white">{{ .CronJobType }} - {{ .CronJobName }}</li>
+                    <li class="list-group-item bg-primary text-white">{{ .ConnectionType }} - {{ .CronJobType }} - {{ .CronJobName }}</li>
                 {{ end }}
                 {{ end }}
             </ul>
