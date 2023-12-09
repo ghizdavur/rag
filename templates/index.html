@@ -28,6 +28,45 @@
             <h1 class="mb-4">Add A Cron Job</h1>
 
             <form hx-post="/add-cronjob/" hx-target="#cronjobs-list" hx-swap="beforeend" hx-indicator="#spinner">
+               
+                <!-- <div class="mb-3">
+                    <label for="cronjob-name">SFTP Host</label>
+                    <input type="text" name="sftpHost" id="sftpHost" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="cronjob-name">SFTP Username</label>
+                    <input type="text" name="sftpUsername" id="sftpUsername" class="form-control" />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="cronjob-name">SFTP Password</label>
+                    <input type="password" name="sftpPassword" id="sftpPassword" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="cronjob-name">SFTP Port</label>
+                    <input type="password" name="sftpPort" id="sftpPort" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="cronjob-name">SFTP Import File Path</label>
+                    <input type="text" name="sftpImportFilePath" id="sftpImportFilePath" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="cronjob-name">SFTP File Type</label>
+                    <input type="text" name="sftpFileType" id="sftpFileType" class="form-control" />
+                </div>
+
+                -->
+                <select class="form-select" aria-label="Select connection type">
+                    <option selected>Select connection type</option>
+                    <option value="1">API</option>
+                    <option value="2">SFTP</option>
+                    <option value="3">FTP</option>
+                  </select>
+                
                 <div class="mb-2">
                     <label for="cronjob-type">CronJob Type</label>
                     <input type="text" name="cronjobType" id="cronjob-type" class="form-control" />
@@ -43,8 +82,6 @@
                 </button>
             </form>
         </div>
-
     </div>
-
 </body>
 </html>
