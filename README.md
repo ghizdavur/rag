@@ -9,7 +9,9 @@ Search Bar: Enable users to search for specific places or regions.
 
 **3. Image Sharing:**
 Upload Images: Users should be able to upload and share images from their travel locations.
+
 Image Gallery: Organize images in a visually appealing gallery for each location.
+
 Comments/Descriptions: Allow users to add comments or descriptions to their images.
 
 **4. Transaction System:**
