@@ -5,49 +5,55 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"time"
 )
 
-type CronJobsListDetails struct {
-	ConnectionType string
-	CronJobType    string
-	CronJobName    string
+type HeaderLinks struct {
+	Login   string
+	Contact string
+	About   string
 }
 
 func main() {
-	fmt.Println("Starting Demand Cron Jobs Server...")
+	fmt.Println("Starting TripFrame Server...")
 
-	// handler function #1 - returns the index.html template, with cronjob data
-	h1 := func(w http.ResponseWriter, r *http.Request) {
-		tmpl := template.Must(template.ParseFiles("templates/index.html"))
-		cronjobsListDetails := map[string][]CronJobsListDetails{
-			"CronsList": {
-				{ConnectionType: "API", CronJobType: "1", CronJobName: "15min CronJob"},
-				{ConnectionType: "SFTP", CronJobType: "2", CronJobName: "1h CronJob"},
-				{ConnectionType: "FTP", CronJobType: "3", CronJobName: "4h CronJob"},
-			},
-		}
-		tmpl.Execute(w, cronjobsListDetails)
-	}
-
-	// handler function #2 - returns the template block with the newly added cronjob, as an HTMX response
-	h2 := func(w http.ResponseWriter, r *http.Request) {
-		time.Sleep(1 * time.Second)
-		connectionType := r.PostFormValue("connectionType")
-		cronjobType := r.PostFormValue("cronjobType")
-		cronjobName := r.PostFormValue("cronjobName")
-		tmpl := template.Must(template.ParseFiles("templates/index.html"))
-		tmpl.ExecuteTemplate(w, "cron-jobs-list", CronJobsListDetails{
-			ConnectionType: connectionType,
-			CronJobType:    cronjobType,
-			CronJobName:    cronjobName,
-		})
-	}
-
-	// define handlers
-	http.HandleFunc("/", h1)
-	http.HandleFunc("/add-cronjob/", h2)
+	http.HandleFunc("/", homePage)
+	http.HandleFunc("/login", loginPage)
+	http.HandleFunc("/contact", contactPage)
+	http.HandleFunc("/about", aboutPage)
 
 	log.Fatal(http.ListenAndServe(":8000", nil))
+}
 
+func homePage(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/index.html"))
+	headerLinks := headerLinks()
+	tmpl.Execute(w, headerLinks)
+}
+
+func loginPage(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/login/index.html"))
+	headerLinks := headerLinks()
+	tmpl.Execute(w, headerLinks)
+}
+
+// TODO - make changes to about index page
+func aboutPage(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/about/index.html"))
+	headerLinks := headerLinks()
+	tmpl.Execute(w, headerLinks)
+}
+
+// TODO - make changes to contact index page
+func contactPage(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("templates/contact/index.html"))
+	headerLinks := headerLinks()
+	tmpl.Execute(w, headerLinks)
+}
+
+func headerLinks() map[string][]HeaderLinks {
+	return map[string][]HeaderLinks{
+		"HeaderLinksTab": {
+			{Login: "Login", Contact: "Contact", About: "About"},
+		},
+	}
 }
