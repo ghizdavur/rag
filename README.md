@@ -68,3 +68,6 @@ Interactive Map: Users can explore different locations through an interactive ma
 **12. Legal Considerations:**
 
 **Terms of Service and Privacy Policy:** Clearly outline terms of service and privacy policies to protect both users and the platform.
+
+
+Setup: https://www.youtube.com/watch?v=pbcTa-a3LBw
