@@ -1,11 +1,17 @@
 package main
 
 import (
+	"cmd/main.go/repositories"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 )
+
+func init() {
+	repositories.LoadEnvVariables()
+	repositories.ConnectToDatabase()
+}
 
 type HeaderLinks struct {
 	Login   string
