@@ -1,8 +1,10 @@
 package main
 
+// Main entry point for the web app
 import (
-	"cmd/main.go/repositories"
 	"log"
+
+	"cmd/main.go/pkg/repositories"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
@@ -20,16 +22,13 @@ type HeaderLinks struct {
 }
 
 func main() {
-	// Initialize standard Go html template engine
-	engine := html.New("./templates/", ".html")
-
 	// New engine(html)
 	app := fiber.New(fiber.Config{
-		Views: engine,
+		Views: html.New("../web/templates/", ".html"),
 	})
 
 	// Define statics - path to use - path in directories
-	app.Static("/templates/styles", "./templates/styles")
+	app.Static("/static", "../web/static/")
 
 	// Routes
 	headerLinks := headerLinks()

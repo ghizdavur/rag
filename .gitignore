@@ -2,7 +2,7 @@
 .DS_Store
 
 # Configs
-cmd/app.yaml
+cmd/core.yaml
 
 # Binaries for programs and plugins
 *.exe
