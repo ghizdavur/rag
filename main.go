@@ -2,10 +2,10 @@ package main
 
 import (
 	"cmd/main.go/repositories"
-	"fmt"
-	"html/template"
 	"log"
-	"net/http"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/html/v2"
 )
 
 func init() {
@@ -20,40 +20,40 @@ type HeaderLinks struct {
 }
 
 func main() {
-	fmt.Println("Starting TripFrame Server...")
+	// Initialize standard Go html template engine
+	engine := html.New("./templates/", ".html")
 
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/login", loginPage)
-	http.HandleFunc("/contact", contactPage)
-	http.HandleFunc("/about", aboutPage)
-
-	log.Fatal(http.ListenAndServe(":8000", nil))
-}
-
-func homePage(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/index.html"))
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
+	app.Static("/templates/styles", "./templates/styles")
 	headerLinks := headerLinks()
-	tmpl.Execute(w, headerLinks)
-}
 
-func loginPage(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/login/index.html"))
-	headerLinks := headerLinks()
-	tmpl.Execute(w, headerLinks)
-}
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
+		})
+	})
 
-// TODO - make changes to about index page
-func aboutPage(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/about/index.html"))
-	headerLinks := headerLinks()
-	tmpl.Execute(w, headerLinks)
-}
+	app.Get("/login", func(c *fiber.Ctx) error {
+		return c.Render("login/index", fiber.Map{
+			"HeaderLinks": headerLinks["HeaderLinksTab"],
+		})
+	})
 
-// TODO - make changes to contact index page
-func contactPage(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/contact/index.html"))
-	headerLinks := headerLinks()
-	tmpl.Execute(w, headerLinks)
+	app.Get("/about", func(c *fiber.Ctx) error {
+		return c.Render("about/index", fiber.Map{
+			"HeaderLinks": headerLinks["HeaderLinksTab"],
+		})
+	})
+
+	app.Get("/contact", func(c *fiber.Ctx) error {
+		return c.Render("contact/index", fiber.Map{
+			"HeaderLinks": headerLinks["HeaderLinksTab"],
+		})
+	})
+
+	log.Fatal(app.Listen(":8000"))
 }
 
 func headerLinks() map[string][]HeaderLinks {
