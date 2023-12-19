@@ -24,7 +24,7 @@ func main() {
 
 	// Define statics - path to use - path in directories
 	app.Static("/static", "../web/static/")
-
+	app.Static("/assets", "../web/assets/")
 	// Set up routes
 	api.SetupRoutes(app)
 
