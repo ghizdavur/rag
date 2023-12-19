@@ -23,10 +23,15 @@ func main() {
 	// Initialize standard Go html template engine
 	engine := html.New("./templates/", ".html")
 
+	// New engine(html)
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
+
+	// Define statics - path to use - path in directories
 	app.Static("/templates/styles", "./templates/styles")
+
+	// Routes
 	headerLinks := headerLinks()
 
 	app.Get("/", func(c *fiber.Ctx) error {
