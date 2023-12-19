@@ -1,3 +1,53 @@
 package api
 
-//# Define API routes
+import (
+	"github.com/gofiber/fiber/v2"
+)
+
+// HeaderLinks represents the structure of header links
+type HeaderLinks struct {
+	Login   string
+	Contact string
+	About   string
+}
+
+// SetupRoutes initializes and configures routes for the application
+func SetupRoutes(app *fiber.App) {
+	headerLinks := headerLinks()
+
+	// Home Page
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
+		})
+	})
+
+	// Login Page
+	app.Get("/login", func(c *fiber.Ctx) error {
+		return c.Render("login/index", fiber.Map{
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
+		})
+	})
+
+	// About Page
+	app.Get("/about", func(c *fiber.Ctx) error {
+		return c.Render("about/index", fiber.Map{
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
+		})
+	})
+
+	// Contact Page
+	app.Get("/contact", func(c *fiber.Ctx) error {
+		return c.Render("contact/index", fiber.Map{
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
+		})
+	})
+}
+
+func headerLinks() map[string][]HeaderLinks {
+	return map[string][]HeaderLinks{
+		"HeaderLinksTab": {
+			{Login: "Login", Contact: "Contact", About: "About"},
+		},
+	}
+}
