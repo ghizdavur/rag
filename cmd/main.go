@@ -24,7 +24,8 @@ type HeaderLinks struct {
 func main() {
 	// New engine(html)
 	app := fiber.New(fiber.Config{
-		Views: html.New("../web/templates/", ".html"),
+		Views:         html.New("../web/templates/", ".html"),
+		CaseSensitive: false,
 	})
 
 	// Define statics - path to use - path in directories
@@ -41,19 +42,19 @@ func main() {
 
 	app.Get("/login", func(c *fiber.Ctx) error {
 		return c.Render("login/index", fiber.Map{
-			"HeaderLinks": headerLinks["HeaderLinksTab"],
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
 		})
 	})
 
 	app.Get("/about", func(c *fiber.Ctx) error {
 		return c.Render("about/index", fiber.Map{
-			"HeaderLinks": headerLinks["HeaderLinksTab"],
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
 		})
 	})
 
 	app.Get("/contact", func(c *fiber.Ctx) error {
 		return c.Render("contact/index", fiber.Map{
-			"HeaderLinks": headerLinks["HeaderLinksTab"],
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
 		})
 	})
 
