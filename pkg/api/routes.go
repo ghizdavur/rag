@@ -36,9 +36,16 @@ func SetupRoutes(app *fiber.App) {
 		})
 	})
 
-	// Register Page
+	// Forgot password page Page
 	app.Get("/forgot-password", func(c *fiber.Ctx) error {
 		return c.Render("register-login/forgot-password/index", fiber.Map{
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
+		})
+	})
+
+	// User Dashboard Page
+	app.Get("/user-dashboard", func(c *fiber.Ctx) error {
+		return c.Render("user-page/index", fiber.Map{
 			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
 		})
 	})
