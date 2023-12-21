@@ -35,6 +35,16 @@ func runMigrations(db *sql.DB) error {
 	return nil
 }
 
+func createUser(db *sql.DB, id, username, password, first_name, surname string) error {
+	_, err := db.Exec("INSERT INTO users (id, username, password, first_name, surname) VALUES ($1, $2, $3, $4, $5)", id, username, password, first_name, surname)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("User created successfully!")
+	return nil
+}
+
 func main() {
 	// Load environment variables from .env file
 	if err := godotenv.Load(); err != nil {
@@ -42,7 +52,15 @@ func main() {
 	}
 
 	// Access environment variables
-	dbURL := os.Getenv("DB_URL")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	// Construct the DB connection string
+	dbURL := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		dbHost, dbPort, dbUser, dbPassword, dbName)
 
 	// Establish a connection to the PostgreSQL database
 	db, err := sql.Open("postgres", dbURL)
@@ -61,6 +79,12 @@ func main() {
 
 	// Run Migrations
 	if err := runMigrations(db); err != nil {
+		log.Fatal(err)
+	}
+
+	// Example of creating a user
+	err = createUser(db, "3", "testuser2", "testpassword", "test first name", "test surname")
+	if err != nil {
 		log.Fatal(err)
 	}
 
