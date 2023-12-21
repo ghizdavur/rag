@@ -24,7 +24,21 @@ func SetupRoutes(app *fiber.App) {
 
 	// Login Page
 	app.Get("/login", func(c *fiber.Ctx) error {
-		return c.Render("login/index", fiber.Map{
+		return c.Render("register-login/login/index", fiber.Map{
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
+		})
+	})
+
+	// Register Page
+	app.Get("/register", func(c *fiber.Ctx) error {
+		return c.Render("register-login/register/index", fiber.Map{
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
+		})
+	})
+
+	// Register Page
+	app.Get("/forgot-password", func(c *fiber.Ctx) error {
+		return c.Render("register-login/forgot-password/index", fiber.Map{
 			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
 		})
 	})
