@@ -13,6 +13,11 @@ type HeaderLinks struct {
 
 // SetupRoutes initializes and configures routes for the application
 func SetupRoutes(app *fiber.App) {
+
+	// Define statics - path to use - path in directories
+	app.Static("/static", "../web/static/")
+	app.Static("/assets", "../web/assets/")
+
 	headerLinks := headerLinks()
 
 	// Home Page

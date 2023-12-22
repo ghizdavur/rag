@@ -18,17 +18,11 @@ func init() {
 }
 
 func main() {
-	// New engine(html)
 	app := fiber.New(fiber.Config{
 		Views:         html.New("../web/templates/", ".html"),
 		CaseSensitive: false,
 	})
 
-	// Define statics - path to use - path in directories
-	app.Static("/static", "../web/static/")
-	app.Static("/assets", "../web/assets/")
-
-	// Set up routes
 	api.SetupRoutes(app)
 
 	log.Fatal(app.Listen(":8000"))

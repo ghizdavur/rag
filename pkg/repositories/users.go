@@ -11,10 +11,10 @@ import (
 
 type User struct {
 	gorm.Model
-	Username  string `gorm:"unique;not null;size:50"`
-	Passwd    string `gorm:"not null;size:255"`
-	FirstName string `gorm:"not null;size:50"`
-	LastName  string `gorm:"not null;size:50"`
+	Username  string `gorm:"unique;not null;size:50" json:"username,omitempty"`
+	Passwd    string `gorm:"not null;size:255" json:"passwd,omitempty"`
+	FirstName string `gorm:"not null;size:50" json:"first_name,omitempty"`
+	LastName  string `gorm:"not null;size:50" json:"last_name,omitempty"`
 }
 
 // CreateUser - creates a user in database
