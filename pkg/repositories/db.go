@@ -18,4 +18,6 @@ func ConnectToDatabase() {
 	if err != nil {
 		fmt.Println("Failed to connect to database!")
 	}
+
+	fmt.Print("Connected to DB!")
 }
