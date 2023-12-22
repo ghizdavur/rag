@@ -83,10 +83,10 @@ func main() {
 	}
 
 	// Example of creating a user
-	err = createUser(db, "3", "testuser2", "testpassword", "test first name", "test surname")
+	/*err = createUser(db, "3", "testuser2", "testpassword", "test first name", "test surname")
 	if err != nil {
 		log.Fatal(err)
-	}
+	}*/
 
 	// New engine(html)
 	app := fiber.New(fiber.Config{
