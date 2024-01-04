@@ -1,6 +1,9 @@
 package api
 
 import (
+	"cmd/main.go/pkg/repositories"
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -32,6 +35,19 @@ func SetupRoutes(app *fiber.App) {
 		return c.Render("register-login/login/index", fiber.Map{
 			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
 		})
+	})
+
+	// Login Page
+	app.Post("/login", func(c *fiber.Ctx) error {
+		username := c.FormValue("username")
+		passwd := c.FormValue("passwd")
+		var user repositories.User
+		result := repositories.DB.Where("username = ?", username).First(&user)
+		fmt.Println(user.Passwd)
+		fmt.Println(passwd)
+		fmt.Println(result)
+
+		return c.Redirect("/success-test")
 	})
 
 	// Register Page
