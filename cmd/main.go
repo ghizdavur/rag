@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 
+	"cmd/main.go/cmd/migrations"
 	"cmd/main.go/pkg/api"
+	"cmd/main.go/pkg/config"
 	"cmd/main.go/pkg/repositories"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,9 +14,9 @@ import (
 )
 
 func init() {
-	repositories.LoadEnvVariables()
+	config.LoadEnvVariables()
 	repositories.ConnectToDatabase()
-	repositories.RunMigrations(repositories.DB)
+	migrations.RunMigrations(repositories.DB)
 }
 
 func main() {

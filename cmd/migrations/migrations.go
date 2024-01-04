@@ -1,4 +1,4 @@
-package repositories
+package migrations
 
 import (
 	"fmt"
