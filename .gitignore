@@ -24,3 +24,6 @@ vendor/
 .idea
 *.iml
 .vscode
+
+# Generated RAG assets
+data/

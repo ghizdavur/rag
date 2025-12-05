@@ -1,8 +1,12 @@
 package api
 
 import (
-	"cmd/main.go/pkg/repositories"
+	"context"
 	"fmt"
+	"time"
+
+	"cmd/main.go/pkg/rag"
+	"cmd/main.go/pkg/repositories"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,7 +19,7 @@ type HeaderLinks struct {
 }
 
 // SetupRoutes initializes and configures routes for the application
-func SetupRoutes(app *fiber.App) {
+func SetupRoutes(app *fiber.App, ragService *rag.Service) {
 
 	// Define statics - path to use - path in directories
 	app.Static("/static", "../web/static/")
@@ -83,6 +87,34 @@ func SetupRoutes(app *fiber.App) {
 		return c.Render("contact/index", fiber.Map{
 			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
 		})
+	})
+
+	app.Post("/api/rag/query", func(c *fiber.Ctx) error {
+		if ragService == nil {
+			return fiber.NewError(fiber.StatusServiceUnavailable, "RAG service is not configured; run the ingestion workflow first.")
+		}
+
+		var request struct {
+			Question string `json:"question"`
+			TopK     int    `json:"topK"`
+		}
+		if err := c.BodyParser(&request); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "invalid request payload")
+		}
+
+		ctx := c.UserContext()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
+		defer cancel()
+
+		answer, err := ragService.Answer(ctx, request.Question, rag.QueryOptions{TopK: request.TopK})
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadGateway, err.Error())
+		}
+
+		return c.JSON(answer)
 	})
 }
 
