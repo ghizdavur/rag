@@ -27,3 +27,6 @@ vendor/
 
 # Generated RAG assets
 data/
+
+# Environment variables
+.env

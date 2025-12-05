@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"os"
 	"path/filepath"
 	"sort"
+	"time"
 )
 
 // VectorStore persists embedded chunks on disk for later querying.
@@ -38,12 +40,31 @@ func BuildVectorStore(ctx context.Context, chunks []Chunk, embedder Embedder, ba
 		for i, chunk := range batch {
 			texts[i] = chunk.Text
 		}
-		embeddings, err := embedder.Embed(ctx, texts)
-		if err != nil {
-			return nil, err
+		
+		// Retry logic for Ollama connection issues on Windows
+		var embeddings [][]float32
+		var err error
+		maxRetries := 5 // Increased retries
+		for attempt := 0; attempt < maxRetries; attempt++ {
+			embeddings, err = embedder.Embed(ctx, texts)
+			if err == nil {
+				break
+			}
+			if attempt < maxRetries-1 {
+				backoff := time.Duration(attempt+1) * 1 * time.Second // Increased backoff
+				time.Sleep(backoff)
+			}
 		}
+		if err != nil {
+			return nil, fmt.Errorf("failed to embed batch [%d:%d] after %d attempts: %w", start, end, maxRetries, err)
+		}
+		
 		for i := range batch {
 			chunks[start+i].Embedding = embeddings[i]
+		}
+		// Add longer delay between batches to avoid overwhelming Ollama on Windows
+		if start+batchSize < len(chunks) {
+			time.Sleep(1 * time.Second) // Increased to 1 second
 		}
 	}
 

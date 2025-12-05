@@ -3,27 +3,31 @@ package main
 import (
 	"context"
 	"log"
+	"path/filepath"
 
-	"cmd/main.go/cmd/migrations"
 	"cmd/main.go/pkg/api"
 	"cmd/main.go/pkg/config"
 	"cmd/main.go/pkg/rag"
-	"cmd/main.go/pkg/repositories"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
-	_ "github.com/lib/pq"
 )
 
 func init() {
 	config.LoadEnvVariables()
-	repositories.ConnectToDatabase()
-	migrations.RunMigrations(repositories.DB)
 }
 
 func main() {
+	templatePath, err := filepath.Abs("./web/templates/")
+	if err != nil {
+		log.Fatalf("Error resolving template path: %v", err)
+	}
+	
+	engine := html.New(templatePath, ".html")
+	engine.Reload(true) // Enable auto-reload for development
+	
 	app := fiber.New(fiber.Config{
-		Views:         html.New("../web/templates/", ".html"),
+		Views:         engine,
 		CaseSensitive: false,
 	})
 

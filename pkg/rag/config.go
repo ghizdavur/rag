@@ -14,7 +14,7 @@ const (
 	// DefaultIndexPath points to the generated vector store relative to the repository root.
 	DefaultIndexPath = "data/rag_index.json"
 
-	DefaultOllamaEmbeddingModel = "nomic-embed-text"
+	DefaultOllamaEmbeddingModel = "nomic-embed-text:latest"
 	DefaultOllamaChatModel      = "llama3:8b"
 	DefaultOllamaBaseURL        = "http://localhost:11434"
 

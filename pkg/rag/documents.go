@@ -50,38 +50,7 @@ func DefaultSourceOptions(baseDir string) SourceOptions {
 	return SourceOptions{
 		LocalDocsDir:      baseDir,
 		IncludeExtensions: []string{".md", ".markdown", ".txt"},
-		RemoteSources: []RemoteSource{
-			{
-				Name:        "Amazon Selling Partner API Samples (README)",
-				URL:         "https://raw.githubusercontent.com/amzn/selling-partner-api-samples/main/README.md",
-				Format:      FormatMarkdown,
-				Description: "GitHub samples that showcase core SP-API workflows",
-			},
-			{
-				Name:        "Selling Partner API Rate Limit Guide",
-				URL:         "https://developer-docs.amazon.com/sp-api/docs/optimize-calls-to-the-selling-partner-api?ld=ASXXSPAPIDirect&pageName=US%3ASPDS%3ASPAPI-fees",
-				Format:      FormatHTML,
-				Description: "Amazon's official guidance on optimizing Selling Partner API usage",
-			},
-			{
-				Name:        "Selling Partner API Documentation Portal",
-				URL:         "https://developer-docs.amazon.com/sp-api",
-				Format:      FormatHTML,
-				Description: "Landing site for all SP-API documentation",
-			},
-			{
-				Name:        "Amazon Pilot + Feature Toggle Tracker",
-				URL:         "https://docs.google.com/spreadsheets/d/1L0AkVtKDOuvYLkeHbYY9McJxcgyVxFJqDdbXsAmmFaM/export?format=tsv&gid=0",
-				Format:      FormatTSV,
-				Description: "Internal sheet with pilot customers and beta configurations",
-			},
-			{
-				Name:        "plentymarkets Amazon MC repositories",
-				URL:         "https://github.com/orgs/plentymarkets/repositories?language=&q=mc-amazon&sort=&type=all",
-				Format:      FormatHTML,
-				Description: "Partner-maintained repos that integrate with Amazon",
-			},
-		},
+		RemoteSources:     []RemoteSource{}, // Disabled remote sources to avoid Ollama issues on Windows
 	}
 }
 
@@ -157,24 +126,29 @@ func collectRemoteDocuments(ctx context.Context, sources []RemoteSource) ([]Docu
 	for _, src := range sources {
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, src.URL, nil)
 		if err != nil {
-			return nil, err
+			fmt.Printf("Warning: failed to create request for %s: %v\n", src.Name, err)
+			continue
 		}
 		resp, err := client.Do(req)
 		if err != nil {
-			return nil, fmt.Errorf("fetch %s: %w", src.URL, err)
+			fmt.Printf("Warning: failed to fetch %s: %v\n", src.Name, err)
+			continue
 		}
 		body, err := io.ReadAll(resp.Body)
 		resp.Body.Close()
 		if err != nil {
-			return nil, fmt.Errorf("read %s: %w", src.URL, err)
+			fmt.Printf("Warning: failed to read response for %s: %v\n", src.Name, err)
+			continue
 		}
 		if resp.StatusCode >= http.StatusBadRequest {
-			return nil, fmt.Errorf("fetch %s: status %d", src.URL, resp.StatusCode)
+			fmt.Printf("Warning: %s returned status %d, skipping\n", src.Name, resp.StatusCode)
+			continue
 		}
 
 		text, err := convertPayload(string(body), src.Format)
 		if err != nil {
-			return nil, fmt.Errorf("convert %s: %w", src.URL, err)
+			fmt.Printf("Warning: failed to convert %s: %v\n", src.Name, err)
+			continue
 		}
 
 		documents = append(documents, Document{

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -172,11 +173,12 @@ func (e *OllamaEmbedder) Embed(ctx context.Context, texts []string) ([][]float32
 
 	resp, err := e.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ollama embed request failed: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode >= http.StatusBadRequest {
-		return nil, fmt.Errorf("ollama embed failed: %s", resp.Status)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("ollama embed failed: %s - %s", resp.Status, string(bodyBytes))
 	}
 
 	var parsed struct {

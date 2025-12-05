@@ -62,7 +62,8 @@ func runIngest(ctx context.Context, cfg rag.ServiceConfig, docsDir, indexPath st
 	}
 
 	meta := rag.MetadataForRun(len(documents), len(chunks))
-	store, err := rag.BuildVectorStore(ctx, chunks, embedder, 16, meta)
+	// Use batch size of 1 with retries to work around Ollama connection issues on Windows
+	store, err := rag.BuildVectorStore(ctx, chunks, embedder, 1, meta)
 	if err != nil {
 		log.Fatalf("build vector store: %v", err)
 	}
