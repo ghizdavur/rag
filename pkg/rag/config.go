@@ -4,22 +4,35 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 const (
+	ProviderOllama = "ollama"
+	ProviderOpenAI = "openai"
+
 	// DefaultIndexPath points to the generated vector store relative to the repository root.
-	DefaultIndexPath       = "data/rag_index.json"
-	DefaultEmbeddingModel  = "text-embedding-3-large"
-	DefaultChatModel       = "gpt-4o-mini"
+	DefaultIndexPath = "data/rag_index.json"
+
+	DefaultOllamaEmbeddingModel = "nomic-embed-text"
+	DefaultOllamaChatModel      = "llama3:8b"
+	DefaultOllamaBaseURL        = "http://localhost:11434"
+
+	DefaultOpenAIEmbeddingModel = "text-embedding-3-large"
+	DefaultOpenAIChatModel      = "gpt-4o-mini"
+
 	DefaultSystemPrompt    = "You are an assistant that answers questions about Amazon Selling Partner integrations. Reply with concise, implementation-focused answers and cite the provided context snippets."
 	DefaultTopK            = 4
 	DefaultLocalDocsFolder = "docs"
+	DefaultProvider        = ProviderOllama
 )
 
 // ServiceConfig controls how the runtime RAG service behaves.
 type ServiceConfig struct {
+	Provider       string
 	IndexPath      string
 	OpenAIAPIKey   string
+	OllamaBaseURL  string
 	EmbeddingModel string
 	ChatModel      string
 	SystemPrompt   string
@@ -29,14 +42,37 @@ type ServiceConfig struct {
 // LoadServiceConfigFromEnv loads runtime RAG configuration from environment variables.
 func LoadServiceConfigFromEnv() ServiceConfig {
 	indexPath := firstNonEmpty(os.Getenv("RAG_INDEX_PATH"), DefaultIndexPath)
-	embeddingModel := firstNonEmpty(os.Getenv("RAG_EMBEDDING_MODEL"), DefaultEmbeddingModel)
-	chatModel := firstNonEmpty(os.Getenv("RAG_CHAT_MODEL"), DefaultChatModel)
+	provider := strings.ToLower(firstNonEmpty(os.Getenv("RAG_PROVIDER"), DefaultProvider))
+	if provider != ProviderOpenAI && provider != ProviderOllama {
+		provider = DefaultProvider
+	}
+
+	embeddingModel := os.Getenv("RAG_EMBEDDING_MODEL")
+	if embeddingModel == "" {
+		if provider == ProviderOllama {
+			embeddingModel = DefaultOllamaEmbeddingModel
+		} else {
+			embeddingModel = DefaultOpenAIEmbeddingModel
+		}
+	}
+
+	chatModel := os.Getenv("RAG_CHAT_MODEL")
+	if chatModel == "" {
+		if provider == ProviderOllama {
+			chatModel = DefaultOllamaChatModel
+		} else {
+			chatModel = DefaultOpenAIChatModel
+		}
+	}
+
 	systemPrompt := firstNonEmpty(os.Getenv("RAG_SYSTEM_PROMPT"), DefaultSystemPrompt)
 	topK := parseIntEnv("RAG_DEFAULT_TOP_K", DefaultTopK)
 
 	return ServiceConfig{
+		Provider:       provider,
 		IndexPath:      resolveWorkspacePath(indexPath),
 		OpenAIAPIKey:   os.Getenv("OPENAI_API_KEY"),
+		OllamaBaseURL:  firstNonEmpty(os.Getenv("RAG_OLLAMA_BASE_URL"), DefaultOllamaBaseURL),
 		EmbeddingModel: embeddingModel,
 		ChatModel:      chatModel,
 		SystemPrompt:   systemPrompt,

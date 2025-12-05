@@ -95,6 +95,22 @@ go run ./cmd/rag --mode ingest --index data/rag_index.json
 ```
 You can point `--docs` to an alternate folder or tweak chunk sizing via `--chunk-size` / `--chunk-overlap`.
 
+### Choose your inference provider
+
+| Provider | Env setup | Notes |
+| --- | --- | --- |
+| Ollama (default) | Install [Ollama](https://ollama.com/), then `ollama pull nomic-embed-text` and `ollama pull llama3:8b`. Optional env vars: `RAG_OLLAMA_BASE_URL`, `RAG_EMBEDDING_MODEL`, `RAG_CHAT_MODEL`. | All inference runs locally. No API key required. |
+| OpenAI | Set `RAG_PROVIDER=openai` and `OPENAI_API_KEY=sk-...`. Optionally override `RAG_EMBEDDING_MODEL` / `RAG_CHAT_MODEL`. | Incurs API costs. |
+
+`RAG_PROVIDER` defaults to `ollama`, so if you simply have Ollama running on `localhost:11434`, you’re ready to ingest/query without any additional config.
+
+### Build the vector store
+Run the ingestion CLI, which fetches + chunks all sources, generates embeddings through the configured provider, and writes `data/rag_index.json`:
+```
+go run ./cmd/rag --mode ingest --index data/rag_index.json
+```
+You can point `--docs` to an alternate folder or tweak chunk sizing via `--chunk-size` / `--chunk-overlap`.
+
 ### Ask questions locally
 ```
 go run ./cmd/rag --mode query --index data/rag_index.json \

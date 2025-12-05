@@ -39,18 +39,15 @@ func NewService(store *VectorStore, embedder Embedder, chatClient ChatClient, cf
 // NewServiceFromEnv loads configuration and supporting assets from disk.
 func NewServiceFromEnv(ctx context.Context) (*Service, error) {
 	cfg := LoadServiceConfigFromEnv()
-	if cfg.OpenAIAPIKey == "" {
-		return nil, errors.New("OPENAI_API_KEY is not configured")
-	}
 	store, err := LoadVectorStore(cfg.IndexPath)
 	if err != nil {
 		return nil, fmt.Errorf("load vector store: %w", err)
 	}
-	embedder, err := NewOpenAIEmbedder(cfg.OpenAIAPIKey, cfg.EmbeddingModel)
+	embedder, err := NewEmbedder(cfg)
 	if err != nil {
 		return nil, err
 	}
-	chatClient, err := NewOpenAIChatClient(cfg.OpenAIAPIKey, cfg.ChatModel)
+	chatClient, err := NewChatClient(cfg)
 	if err != nil {
 		return nil, err
 	}

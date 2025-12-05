@@ -22,8 +22,8 @@ func main() {
 
 	ctx := context.Background()
 	cfg := rag.LoadServiceConfigFromEnv()
-	if cfg.OpenAIAPIKey == "" {
-		log.Fatal("OPENAI_API_KEY must be set before running the RAG utility")
+	if cfg.Provider == rag.ProviderOpenAI && cfg.OpenAIAPIKey == "" {
+		log.Fatal("OPENAI_API_KEY must be set when RAG_PROVIDER=openai")
 	}
 
 	resolvedIndex := rag.ResolveWorkspacePath(*indexPath)
@@ -56,7 +56,7 @@ func runIngest(ctx context.Context, cfg rag.ServiceConfig, docsDir, indexPath st
 	}
 
 	chunks := rag.ChunkDocuments(documents, rag.ChunkOptions{Size: chunkSize, Overlap: chunkOverlap})
-	embedder, err := rag.NewOpenAIEmbedder(cfg.OpenAIAPIKey, cfg.EmbeddingModel)
+	embedder, err := rag.NewEmbedder(cfg)
 	if err != nil {
 		log.Fatalf("create embedder: %v", err)
 	}
@@ -78,11 +78,11 @@ func runQuery(ctx context.Context, cfg rag.ServiceConfig, question, indexPath st
 	if err != nil {
 		log.Fatalf("load vector store: %v", err)
 	}
-	embedder, err := rag.NewOpenAIEmbedder(cfg.OpenAIAPIKey, cfg.EmbeddingModel)
+	embedder, err := rag.NewEmbedder(cfg)
 	if err != nil {
 		log.Fatalf("create embedder: %v", err)
 	}
-	chatClient, err := rag.NewOpenAIChatClient(cfg.OpenAIAPIKey, cfg.ChatModel)
+	chatClient, err := rag.NewChatClient(cfg)
 	if err != nil {
 		log.Fatalf("create chat client: %v", err)
 	}
