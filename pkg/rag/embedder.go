@@ -229,7 +229,7 @@ func NewOllamaChatClient(baseURL, model string) *OllamaChatClient {
 	return &OllamaChatClient{
 		baseURL:    strings.TrimRight(baseURL, "/"),
 		model:      model,
-		httpClient: &http.Client{Timeout: 60 * time.Second},
+		httpClient: &http.Client{Timeout: 180 * time.Second}, // Increased to 3 minutes for LLM generation
 	}
 }
 

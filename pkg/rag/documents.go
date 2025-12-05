@@ -108,7 +108,7 @@ func collectLocalDocuments(opts SourceOptions) ([]Document, error) {
 		rel, _ := filepath.Rel(opts.LocalDocsDir, path)
 		content := normalizeWhitespace(string(data))
 		documents = append(documents, Document{
-			ID:      slugify(rel),
+			ID:      Slugify(rel),
 			Title:   fmt.Sprintf("Local: %s", rel),
 			URI:     path,
 			Source:  "local-docs",
@@ -152,7 +152,7 @@ func collectRemoteDocuments(ctx context.Context, sources []RemoteSource) ([]Docu
 		}
 
 		documents = append(documents, Document{
-			ID:      slugify(src.Name),
+			ID:      Slugify(src.Name),
 			Title:   src.Name,
 			URI:     src.URL,
 			Source:  src.Description,
@@ -194,7 +194,8 @@ func normalizeWhitespace(input string) string {
 
 var slugMatcher = regexp.MustCompile(`[^a-z0-9]+`)
 
-func slugify(input string) string {
+// Slugify converts a string to a URL-friendly slug.
+func Slugify(input string) string {
 	lower := strings.ToLower(input)
 	slug := slugMatcher.ReplaceAllString(lower, "-")
 	slug = strings.Trim(slug, "-")

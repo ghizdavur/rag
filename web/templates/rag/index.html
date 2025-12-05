@@ -27,6 +27,41 @@
                                 <p class="text-muted mb-4">
                                     Ask any question about Amazon Selling Partner projects, feature toggles, pilot customers, or rate limits. We search the local knowledge base and the official docs you configured, then respond with cited answers.
                                 </p>
+                                
+                                <!-- Add Source Section -->
+                                <div class="mb-4">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#addSourceCollapse" aria-expanded="false">
+                                        <i class="bi-plus-circle"></i> Add Source (Text or URL)
+                                    </button>
+                                    <div class="collapse mt-3" id="addSourceCollapse">
+                                        <div class="card card-body">
+                                            <form id="addSourceFormElement" autocomplete="off">
+                                                <div class="mb-3">
+                                                    <label class="form-label" for="sourceTitle">Title (optional)</label>
+                                                    <input type="text" class="form-control" id="sourceTitle" placeholder="e.g. API Documentation">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label" for="sourceURL">URL (optional)</label>
+                                                    <input type="url" class="form-control" id="sourceURL" placeholder="https://example.com/docs">
+                                                    <small class="form-text text-muted">Leave empty if adding text directly</small>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label" for="sourceContent">Content</label>
+                                                    <textarea class="form-control" id="sourceContent" rows="6" placeholder="Paste your text content here, or leave empty if using URL"></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary" id="addSourceBtn">
+                                                    <span class="default-label">Add Source</span>
+                                                    <span class="loading-label d-none">
+                                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                                        Processing...
+                                                    </span>
+                                                </button>
+                                            </form>
+                                            <div id="addSourceStatus" class="mt-2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <form id="ragForm" class="rag-form" autocomplete="off">
                                     <label class="form-label fw-semibold" for="question">Question</label>
                                     <textarea class="form-control" id="question" name="question" rows="4" placeholder="e.g. How should we handle SP-API rate limits for FBA orders?" required></textarea>
@@ -122,6 +157,95 @@
                     setLoading(false);
                 }
             });
+
+            // Add Source Form Handler
+            const addSourceFormEl = document.getElementById("addSourceFormElement");
+            const addSourceBtn = document.getElementById("addSourceBtn");
+            const addSourceStatus = document.getElementById("addSourceStatus");
+
+            if (addSourceFormEl && addSourceBtn) {
+                addSourceFormEl.addEventListener("submit", async (event) => {
+                    event.preventDefault();
+                    const titleEl = document.getElementById("sourceTitle");
+                    const urlEl = document.getElementById("sourceURL");
+                    const contentEl = document.getElementById("sourceContent");
+                    
+                    if (!titleEl || !urlEl || !contentEl) {
+                        console.error("Form elements not found");
+                        return;
+                    }
+                    
+                    const title = titleEl.value.trim();
+                    const url = urlEl.value.trim();
+                    const content = contentEl.value.trim();
+
+                    if (!url && !content) {
+                        addSourceStatus.innerHTML = '<div class="alert alert-danger">Please provide either a URL or content.</div>';
+                        return;
+                    }
+
+                    const defaultLabel = addSourceBtn.querySelector(".default-label");
+                    const loadingLabel = addSourceBtn.querySelector(".loading-label");
+                    addSourceBtn.disabled = true;
+                    if (defaultLabel) defaultLabel.classList.add("d-none");
+                    if (loadingLabel) loadingLabel.classList.remove("d-none");
+                    addSourceStatus.innerHTML = "";
+
+                    try {
+                        // Build payload - only include non-empty values
+                        const payload = {};
+                        if (title) payload.title = title;
+                        if (url) payload.url = url;
+                        if (content) payload.content = content;
+                        
+                        console.log("Sending payload:", payload);
+                        console.log("URL value:", url, "Content length:", content.length);
+                        
+                        if (!payload.url && !payload.content) {
+                            addSourceStatus.innerHTML = '<div class="alert alert-danger">Please provide either a URL or content.</div>';
+                            addSourceBtn.disabled = false;
+                            if (defaultLabel) defaultLabel.classList.remove("d-none");
+                            if (loadingLabel) loadingLabel.classList.add("d-none");
+                            return;
+                        }
+                        
+                        const response = await fetch("/api/rag/add-source", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            const text = await response.text();
+                            throw new Error(text || "Failed to add source");
+                        }
+
+                        const data = await response.json();
+                        addSourceStatus.innerHTML = '<div class="alert alert-success">✅ Source added successfully! You can now ask questions about it.</div>';
+                        addSourceFormEl.reset();
+                        
+                        // Collapse form after success
+                        setTimeout(() => {
+                            const collapseEl = document.getElementById("addSourceCollapse");
+                            if (collapseEl) {
+                                const bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl, {toggle: false});
+                                bsCollapse.hide();
+                            }
+                        }, 2000);
+                    } catch (err) {
+                        console.error("Error adding source:", err);
+                        addSourceStatus.innerHTML = `<div class="alert alert-danger">❌ Error: ${err.message}</div>`;
+                    } finally {
+                        addSourceBtn.disabled = false;
+                        if (defaultLabel) defaultLabel.classList.remove("d-none");
+                        if (loadingLabel) loadingLabel.classList.add("d-none");
+                    }
+                });
+            } else {
+                console.error("Add source form elements not found");
+            }
         </script>
+        <!-- Bootstrap JS for collapse -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

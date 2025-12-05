@@ -135,3 +135,62 @@ func MetadataForRun(sourceCount, chunkCount int) Metadata {
 		ChunkCount:  chunkCount,
 	}
 }
+
+// AddSource adds a new text source to the existing vector store.
+func (s *Service) AddSource(ctx context.Context, title, content, uri string) error {
+	if s == nil || s.store == nil {
+		return errors.New("rag service is not initialized")
+	}
+	if content == "" {
+		return errors.New("content cannot be empty")
+	}
+	if title == "" {
+		title = "User Added Source"
+	}
+	if uri == "" {
+		uri = "user-input://" + title
+	}
+
+	// Create document from text
+	doc := Document{
+		ID:      Slugify(title),
+		Title:   title,
+		URI:     uri,
+		Source:  "user-added",
+		Content: strings.TrimSpace(content),
+	}
+
+	// Chunk the document
+	chunks := ChunkDocuments([]Document{doc}, ChunkOptions{Size: 1400, Overlap: 200})
+
+	// Embed chunks
+	embedder := s.embedder
+	for i := range chunks {
+		texts := []string{chunks[i].Text}
+		embeddings, err := embedder.Embed(ctx, texts)
+		if err != nil {
+			return fmt.Errorf("failed to embed chunk: %w", err)
+		}
+		if len(embeddings) > 0 {
+			chunks[i].Embedding = embeddings[0]
+		}
+		// Small delay to avoid overwhelming Ollama
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	// Add chunks to existing store
+	s.store.Chunks = append(s.store.Chunks, chunks...)
+	s.store.Metadata.SourceCount++
+	s.store.Metadata.ChunkCount += len(chunks)
+	s.store.Metadata.GeneratedAt = time.Now().UTC()
+
+	return nil
+}
+
+// SaveStore saves the current vector store to disk.
+func (s *Service) SaveStore(indexPath string) error {
+	if s == nil || s.store == nil {
+		return errors.New("rag service is not initialized")
+	}
+	return s.store.Save(indexPath)
+}
