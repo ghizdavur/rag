@@ -71,3 +71,68 @@ Interactive Map: Users can explore different locations through an interactive ma
 
 
 Setup: https://www.youtube.com/watch?v=pbcTa-a3LBw
+
+---
+
+## Amazon SP-API Retrieval-Augmented Generation (RAG)
+
+Engineers can now query the project knowledge base—local docs plus the official Amazon references shared in the brief—through a lightweight Retrieval-Augmented Generation (RAG) workflow.
+
+### Prerequisites
+- Create a `.env` file (or export in your shell) with:
+  - `OPENAI_API_KEY=<your key>`
+  - Optional overrides: `RAG_INDEX_PATH`, `RAG_CHAT_MODEL`, `RAG_EMBEDDING_MODEL`, `RAG_DEFAULT_TOP_K`.
+- Ensure the `docs/` folder contains any internal notes you want embedded. Remote sources already include:
+  - Amazon Selling Partner API samples README
+  - Official SP-API rate limit guide + docs portal
+  - Pilot/feature-toggle Google Sheet (TSV export)
+  - plentymarkets `mc-amazon` repositories listing
+
+### Build the vector store
+Run the ingestion CLI, which fetches + chunks all sources, generates embeddings, and writes `data/rag_index.json`:
+```
+go run ./cmd/rag --mode ingest --index data/rag_index.json
+```
+You can point `--docs` to an alternate folder or tweak chunk sizing via `--chunk-size` / `--chunk-overlap`.
+
+### Choose your inference provider
+
+| Provider | Env setup | Notes |
+| --- | --- | --- |
+| Ollama (default) | Install [Ollama](https://ollama.com/), then `ollama pull nomic-embed-text` and `ollama pull llama3:8b`. Optional env vars: `RAG_OLLAMA_BASE_URL`, `RAG_EMBEDDING_MODEL`, `RAG_CHAT_MODEL`. | All inference runs locally. No API key required. |
+| OpenAI | Set `RAG_PROVIDER=openai` and `OPENAI_API_KEY=sk-...`. Optionally override `RAG_EMBEDDING_MODEL` / `RAG_CHAT_MODEL`. | Incurs API costs. |
+
+`RAG_PROVIDER` defaults to `ollama`, so if you simply have Ollama running on `localhost:11434`, you’re ready to ingest/query without any additional config.
+
+### Build the vector store
+Run the ingestion CLI, which fetches + chunks all sources, generates embeddings through the configured provider, and writes `data/rag_index.json`:
+```
+go run ./cmd/rag --mode ingest --index data/rag_index.json
+```
+You can point `--docs` to an alternate folder or tweak chunk sizing via `--chunk-size` / `--chunk-overlap`.
+
+### Ask questions locally
+```
+go run ./cmd/rag --mode query --index data/rag_index.json \
+  --question "How should we throttle SP-API calls for FBA orders?"
+```
+The CLI prints the synthesized answer plus the supporting sources/scores.
+
+### Ask through the UI
+1. Start the Fiber server (`go run ./cmd/main.go`) with `OPENAI_API_KEY` and a generated `data/rag_index.json`.
+2. Navigate to [http://localhost:8000/rag](http://localhost:8000/rag) and use the form to submit questions.
+3. Results include the formatted answer and a list of cited sources. Errors are shown inline if the backend cannot load the vector store.
+
+### API endpoint
+Once an index exists, the Fiber server automatically wires `/api/rag/query`:
+```
+POST /api/rag/query
+{
+  "question": "What are the SP-API rate limit tiers?",
+  "topK": 4     // optional override
+}
+```
+If the service cannot load (missing key or index), the endpoint returns `503` with guidance.
+
+### Regenerating data
+The generated embeddings live under `data/` (git-ignored). Re-run the ingestion command whenever you add docs or when Amazon updates their public guidance.

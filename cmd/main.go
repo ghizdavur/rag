@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"cmd/main.go/cmd/migrations"
 	"cmd/main.go/pkg/api"
 	"cmd/main.go/pkg/config"
+	"cmd/main.go/pkg/rag"
 	"cmd/main.go/pkg/repositories"
 
 	"github.com/gofiber/fiber/v2"
@@ -25,7 +27,13 @@ func main() {
 		CaseSensitive: false,
 	})
 
-	api.SetupRoutes(app)
+	ctx := context.Background()
+	ragService, err := rag.NewServiceFromEnv(ctx)
+	if err != nil {
+		log.Printf("RAG service disabled: %v", err)
+	}
+
+	api.SetupRoutes(app, ragService)
 
 	log.Fatal(app.Listen(":8000"))
 }
