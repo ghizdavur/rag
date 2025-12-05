@@ -89,6 +89,13 @@ func SetupRoutes(app *fiber.App, ragService *rag.Service) {
 		})
 	})
 
+	// Amazon Copilot Page
+	app.Get("/rag", func(c *fiber.Ctx) error {
+		return c.Render("rag/index", fiber.Map{
+			"HeaderLinksTab": headerLinks["HeaderLinksTab"],
+		})
+	})
+
 	app.Post("/api/rag/query", func(c *fiber.Ctx) error {
 		if ragService == nil {
 			return fiber.NewError(fiber.StatusServiceUnavailable, "RAG service is not configured; run the ingestion workflow first.")

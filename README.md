@@ -102,6 +102,11 @@ go run ./cmd/rag --mode query --index data/rag_index.json \
 ```
 The CLI prints the synthesized answer plus the supporting sources/scores.
 
+### Ask through the UI
+1. Start the Fiber server (`go run ./cmd/main.go`) with `OPENAI_API_KEY` and a generated `data/rag_index.json`.
+2. Navigate to [http://localhost:8000/rag](http://localhost:8000/rag) and use the form to submit questions.
+3. Results include the formatted answer and a list of cited sources. Errors are shown inline if the backend cannot load the vector store.
+
 ### API endpoint
 Once an index exists, the Fiber server automatically wires `/api/rag/query`:
 ```
