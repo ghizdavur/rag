@@ -10,3 +10,4 @@ ollama pull llama3:8b
 Write-Host "`n✅ Setup complet! Acum poți rula ingestion-ul." -ForegroundColor Green
 Write-Host "Rulează: go run ./cmd/rag --mode ingest --index data/rag_index.json" -ForegroundColor Cyan
 
+

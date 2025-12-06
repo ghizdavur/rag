@@ -65,3 +65,4 @@ go run ./cmd/rag --mode ingest --index data/rag_index.json
 
 Then restart the server to use the new index.
 
+

@@ -257,13 +257,17 @@ func (c *OllamaChatClient) Complete(ctx context.Context, systemPrompt, prompt st
 	}
 	req.Header.Set("Content-Type", "application/json")
 
+	// Debug: log the model being used
+	fmt.Printf("[DEBUG] Ollama chat request - Model: %s, URL: %s/api/chat\n", c.model, c.baseURL)
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("ollama chat request failed: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode >= http.StatusBadRequest {
-		return "", fmt.Errorf("ollama chat failed: %s", resp.Status)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("ollama chat failed: %s - %s", resp.Status, string(bodyBytes))
 	}
 
 	var parsed struct {

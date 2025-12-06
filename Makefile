@@ -56,3 +56,4 @@ setup:
 	@echo "✅ Setup complete!"
 	@echo "Edit .env file and run 'make ingest' to create the index"
 
+

@@ -52,3 +52,4 @@ After editing, run ingestion:
 go run ./cmd/rag --mode ingest --index data/rag_index.json
 ```
 
+

@@ -272,3 +272,4 @@ chmod +x rag-server
 - Pentru producție, folosește HTTPS
 - Monitorizează resursele (CPU, RAM) - Ollama poate consuma multă memorie
 
+

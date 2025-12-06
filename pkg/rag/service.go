@@ -70,6 +70,8 @@ func (s *Service) Answer(ctx context.Context, question string, opts QueryOptions
 		opts.Temperature = 0.2
 	}
 
+	// Step 1: Generate query embedding
+	embedStart := time.Now()
 	embeddings, err := s.embedder.Embed(ctx, []string{trimmed})
 	if err != nil {
 		return nil, err
@@ -77,14 +79,25 @@ func (s *Service) Answer(ctx context.Context, question string, opts QueryOptions
 	if len(embeddings) == 0 {
 		return nil, errors.New("empty query embedding")
 	}
+	embedDuration := time.Since(embedStart)
+	fmt.Printf("[PERF] Query embedding: %v\n", embedDuration)
 
+	// Step 2: Search vector store
+	searchStart := time.Now()
 	matches := s.store.Search(embeddings[0], opts.TopK)
 	if len(matches) == 0 {
 		return nil, errors.New("no context available; run ingestion first")
 	}
+	searchDuration := time.Since(searchStart)
+	fmt.Printf("[PERF] Vector search (%d chunks): %v\n", len(s.store.Chunks), searchDuration)
 
+	// Step 3: Generate answer
 	prompt := buildPrompt(trimmed, matches)
+	genStart := time.Now()
 	answer, err := s.chatClient.Complete(ctx, s.systemPrompt, prompt, opts.Temperature)
+	genDuration := time.Since(genStart)
+	fmt.Printf("[PERF] LLM generation: %v\n", genDuration)
+	fmt.Printf("[PERF] Total time: %v\n", time.Since(embedStart))
 	if err != nil {
 		return nil, err
 	}
